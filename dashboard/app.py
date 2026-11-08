@@ -5,6 +5,7 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
+import plotly.express as px
 import streamlit as st
 
 
@@ -28,22 +29,22 @@ def load_metrics(metrics_path: Path) -> dict:
         return json.load(file)
 
 
-def build_delay_distribution(data: pd.DataFrame) -> pd.Series:
+def build_delay_distribution(data: pd.DataFrame) -> pd.DataFrame:
     """Agrupa os atrasos em faixas para deixar o gráfico legível."""
     delay_days = data["delivery_delay_days"].clip(lower=-15, upper=30)
     bins = [-15, -10, -5, 0, 5, 10, 15, 20, 30]
     labels = [
-        "Antecipado: 10 a 15 dias",
-        "Antecipado: 5 a 10 dias",
-        "Antecipado: 0 a 5 dias",
-        "Atraso: 0 a 5 dias",
-        "Atraso: 5 a 10 dias",
-        "Atraso: 10 a 15 dias",
-        "Atraso: 15 a 20 dias",
-        "Atraso: 20 a 30 dias",
+        "15 a 10 dias antes",
+        "10 a 5 dias antes",
+        "5 a 0 dias antes",
+        "0 a 5 dias de atraso",
+        "5 a 10 dias de atraso",
+        "10 a 15 dias de atraso",
+        "15 a 20 dias de atraso",
+        "20 a 30 dias de atraso",
     ]
 
-    distribution = (
+    counts = (
         pd.cut(
             delay_days,
             bins=bins,
@@ -53,9 +54,22 @@ def build_delay_distribution(data: pd.DataFrame) -> pd.Series:
         .value_counts()
         .reindex(labels, fill_value=0)
     )
-    distribution.index.name = "Faixa de entrega"
-    distribution.name = "Quantidade de pedidos"
-    return distribution
+    return pd.DataFrame(
+        {
+            "Faixa": labels,
+            "Quantidade de pedidos": counts.to_numpy(),
+            "Tipo": [
+                "Entrega antecipada",
+                "Entrega antecipada",
+                "Entrega antecipada",
+                "Atraso",
+                "Atraso",
+                "Atraso",
+                "Atraso",
+                "Atraso",
+            ],
+        }
+    )
 
 
 def main() -> None:
@@ -99,7 +113,38 @@ def main() -> None:
         "Cada barra representa a quantidade de pedidos entregues antes, "
         "no prazo ou depois da data estimada."
     )
-    st.bar_chart(build_delay_distribution(data))
+    delay_distribution = build_delay_distribution(data)
+    delay_chart = px.bar(
+        delay_distribution,
+        x="Quantidade de pedidos",
+        y="Faixa",
+        color="Tipo",
+        orientation="h",
+        text="Quantidade de pedidos",
+        color_discrete_map={
+            "Entrega antecipada": "#2ca02c",
+            "Atraso": "#d62728",
+        },
+        labels={
+            "Quantidade de pedidos": "Pedidos",
+            "Faixa": "Diferença para a data estimada",
+            "Tipo": "Situação",
+        },
+    )
+    delay_chart.update_traces(
+        texttemplate="%{text:,}",
+        textposition="outside",
+    )
+    delay_chart.update_layout(
+        height=430,
+        showlegend=True,
+        yaxis={
+            "categoryorder": "array",
+            "categoryarray": delay_distribution["Faixa"].tolist(),
+        },
+        margin={"l": 10, "r": 30, "t": 20, "b": 10},
+    )
+    st.plotly_chart(delay_chart, use_container_width=True)
 
     st.subheader("Avaliações negativas por estado")
     st.write(
