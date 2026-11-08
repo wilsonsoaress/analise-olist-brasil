@@ -44,13 +44,18 @@ Este é o primeiro projeto da série de Data Science usando o dataset público d
 
 ### 1) Coleta e organização dos dados
 
-Baixe o dataset da Olist no Kaggle e coloque os arquivos CSV em:
+Baixe o dataset [Brazilian E-Commerce Public Dataset by Olist no Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce).
+Depois, extraia os arquivos CSV e coloque-os em:
 
 - `data/raw/olist_orders_dataset.csv`
 - `data/raw/olist_order_items_dataset.csv`
 - `data/raw/olist_order_payments_dataset.csv`
 - `data/raw/olist_order_reviews_dataset.csv`
 - `data/raw/olist_customers_dataset.csv`
+
+O Kaggle pode exigir login e aceite dos termos de uso. Os arquivos brutos não
+são versionados neste repositório; cada pessoa deve baixá-los localmente antes
+de executar o pipeline.
 
 ### 2) Treinamento e avaliação dos modelos
 
