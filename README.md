@@ -66,6 +66,17 @@ Execute o pipeline:
 python src/train.py --raw-dir data/raw
 ```
 
+Para estudar o pipeline com nomes de funções, variáveis e comentários em português,
+execute a versão didática:
+
+```bash
+python src/treinar.py --pasta-dados data/raw
+```
+
+Essa versão mantém as mesmas etapas do `train.py`, mas usa nomes em português.
+Os arquivos de saída dos modelos recebem nomes diferentes para não sobrescrever
+os modelos gerados pelo pipeline original.
+
 Saídas geradas:
 
 - `data/processed/modeling_dataset.csv`
